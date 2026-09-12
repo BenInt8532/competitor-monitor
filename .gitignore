@@ -34,3 +34,7 @@ tmp-*.png
 Thumbs.db
 Desktop.ini
 .DS_Store
+
+# Шпаргалка агенту и разовая миграция локальных JSON — не часть приложения
+CLAUDE.md
+migrate_flag_severity.py
