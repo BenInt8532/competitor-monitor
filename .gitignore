@@ -1,0 +1,36 @@
+# Секреты — никогда не коммитить
+.env
+.env.*
+!.env.example
+
+# Виртуальное окружение
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# История анализов и накопленные профили (локальные данные)
+history.json
+competitors.json
+manual-rates.json
+
+# Сборка .exe (шаг 5 ДЗ)
+dist/
+build/
+*.spec
+
+# Selenium / ChromeDriver кэш не нужен в репо
+.wdm/
+
+# Временные скриншоты проверки интерфейса
+tmp-*.png
+
+# Система
+Thumbs.db
+Desktop.ini
+.DS_Store

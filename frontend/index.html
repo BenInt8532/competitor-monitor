@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Мониторинг конкурентов — крипто-обменники</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/styles.css?v=11">
+</head>
+<body>
+  <header>
+    <h1>Мониторинг конкурентов</h1>
+    <p class="subtitle">Крипто-обменники · анализ безопасности и маркетинга</p>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="analyze">Анализ</button>
+    <button class="tab-btn" data-tab="batch">Папки data/</button>
+    <button class="tab-btn" data-tab="reviews">Отзывы</button>
+    <button class="tab-btn" data-tab="summary">Сравнение</button>
+    <button class="tab-btn" data-tab="history">История</button>
+  </nav>
+
+  <main>
+    <!-- === Анализ: ссылки, файлы, текст === -->
+    <section id="tab-analyze" class="tab-content active">
+
+      <h2>Ссылки на сайты</h2>
+      <p class="hint">
+        До <span id="sites-limit">10</span> ссылок: вставь списком или добавляй по одной.
+        Название обменника определяется по домену автоматически.
+      </p>
+
+      <div class="row">
+        <input type="url" id="site-single-input" placeholder="https://coindrop.trade">
+        <button id="site-add-btn" class="secondary">Добавить</button>
+      </div>
+
+      <textarea id="site-list-input" rows="4"
+        placeholder="Или списком, по одной ссылке в строке:&#10;coindrop.trade&#10;buhtaobmena.me&#10;storebucks.io"></textarea>
+      <div class="row">
+        <button id="site-add-list-btn" class="secondary">Добавить список</button>
+        <button id="site-clear-btn" class="secondary">Очистить очередь</button>
+      </div>
+
+      <label class="checkbox">
+        <input type="checkbox" id="site-include-reviews" checked>
+        Искать отзывы на BestChange и сторонних площадках
+      </label>
+
+      <div id="site-queue"></div>
+
+      <button id="site-run-btn" disabled>Проанализировать</button>
+      <p class="hint">Каждый сайт открывается в фоновом браузере — около минуты на ссылку.</p>
+
+      <hr class="section-split">
+
+      <h2>Файлы</h2>
+      <p class="hint">
+        Один файл или пачка, разные обменники сразу. Название читается из содержимого.
+        Если про одного обменника пришли и скрин, и Word — данные сложатся в один профиль.
+        Таблица (XLSX/CSV) со ссылками разбирается как список конкурентов: ячейки пишутся в профили,
+        ссылки попадают в очередь сайтов выше.
+        В заметке есть ссылка, а выплаты или курса нет — приложение само откроет сайт
+        (10–15 секунд) и доберёт недостающее. Если сайт не открылся, разбор текста не падает.
+      </p>
+      <p class="formats" id="formats-hint">Поддерживаются: PNG, JPG, WEBP, GIF · PDF · HTML, MHTML · TXT, MD, CSV, JSON</p>
+
+      <input type="file" id="file-input" multiple
+        accept="image/*,.heic,.heif,application/pdf,.docx,.xlsx,.xlsm,.html,.htm,.mhtml,.mht,.txt,.md,.csv,.json">
+      <input type="text" id="file-competitor-name" placeholder="Название определится автоматически" readonly>
+      <button id="file-analyze-btn">Проанализировать файлы</button>
+
+      <hr class="section-split">
+
+      <h2>Текст</h2>
+      <p class="hint">
+        Единственное место, где название вводится руками — в тексте его может не быть.
+        Если в тексте есть ссылка, а выплаты или курса нет — зайдём на сайт и дозаполним.
+      </p>
+      <input type="text" id="text-competitor-name" placeholder="Название конкурента (например, CoinDrop)">
+      <input type="number" id="text-exchanger-rate" placeholder="Курс ₽/USDT (необязательно)" step="0.01">
+      <textarea id="text-input" rows="6" placeholder="Описание сервиса, условия обмена, отзывы клиентов..."></textarea>
+      <button id="text-analyze-btn">Проанализировать текст</button>
+
+      <div id="analyze-results"></div>
+    </section>
+
+    <!-- === Папки data/ === -->
+    <section id="tab-batch" class="tab-content">
+      <h2>Папки data/</h2>
+      <p class="hint">
+        Проходит по подпапкам <code>data/</code> и анализирует <code>notes.md</code> в каждой.
+        Скупые заметки со ссылкой дозаполняются с сайта — это может занять минуту на папку.
+      </p>
+      <button id="batch-analyze-btn">Проанализировать всех</button>
+      <div id="batch-result" class="result"></div>
+    </section>
+
+    <!-- === Отзывы === -->
+    <section id="tab-reviews" class="tab-content">
+      <h2>Отзывы о конкуренте</h2>
+      <p class="hint">
+        По ссылке находим страницу обменника на BestChange (отзывы и финансовые претензии)
+        и сторонние площадки, затем ищем в отзывах красные и зелёные маркеры.
+        Сайты «помогу вернуть деньги» отбрасываются.
+      </p>
+      <input type="url" id="reviews-url-input" placeholder="https://grumbot.net">
+      <textarea id="reviews-extra-input" rows="2"
+        placeholder="Необязательно: свои ссылки на страницы отзывов, по одной в строке"></textarea>
+      <button id="reviews-run-btn">Найти и разобрать отзывы</button>
+      <div id="reviews-result" class="result"></div>
+    </section>
+
+    <!-- === Сравнение === -->
+    <section id="tab-summary" class="tab-content">
+      <h2>Сравнение конкурентов</h2>
+      <button id="summary-refresh-btn" class="secondary">Обновить курсы</button>
+      <button id="summary-export-btn" class="secondary">Скачать CSV</button>
+      <p class="hint">
+        Таблица собирается сама при открытии вкладки — из всего, что уже накоплено по каждому обменнику.
+        «Обновить курсы» тянет USDT/RUB с BestChange (банковский счёт, расчётный счёт и наличные).
+        CSV — чтобы приложить таблицу к ДЗ без скриншота.
+      </p>
+      <p class="hint" id="summary-cbr-rate"></p>
+
+      <details>
+        <summary>Что значат колонки</summary>
+        <div class="legend">
+          <p><span class="label">Материалы</span>
+            Какие именно файлы и разборы сложились в строку: скрин, PDF, Word, таблица, сайт, отзывы.
+            Цифра «4» без списка ни о чём не говорит.</p>
+          <p><span class="label">Доверие</span>
+            Это не рейтинг биржи и не Proof of Reserves. Для мелких обменников такой аудитории нет.
+            Считаем так:<br>
+            1) Если модель разбирала текст или отзывы — среднее её баллов 0–10 по чеклисту
+            (один платёж, реквизиты/наличные, AML до отправки, фиксация курса, резерв, жалобы).<br>
+            2) Если баллов не было (часто так у одних скринов) — простая шкала по уже найденным
+            флагам: старт 5, +1 за зелёный, −1 за лёгкий красный.<br>
+            3) Нет ни текста, ни флагов — прочерк. Смотри подсказку под цифрой.<br><br>
+            <strong>Красные флаги не равны между собой.</strong> Тяжёлые не вычитают балл,
+            а ставят потолок — выше него оценка не поднимется, сколько бы плюсов ни нашлось:<br>
+            · <strong>не выше 3</strong> — жалобы, что карту или счёт заблокировали после выплаты;<br>
+            · <strong>не выше 4</strong> — дробление выплаты на мелкие платежи, требования доплаты
+            или документов после отправки крипты, заморозка под AML с комиссией, просьба держать
+            открытым личный кабинет банка;<br>
+            · <strong>−1 балл</strong> — только СБП без реквизитов, задержки, подозрительно
+            выгодный курс, мало отзывов.<br>
+            Почему так: быстрая поддержка и удобный сайт не компенсируют потерянные деньги.
+            Без потолка обменник с жалобами на блокировку карт набирал 7 из 10 за счёт плюсов.
+            Если потолок сработал, под оценкой написано, из-за чего.<br>
+            На цифру смотри во вторую очередь, на красные флаги — в первую.</p>
+          <p><span class="label">Дизайн</span>
+            Не «красиво», а первый сигнал доверия к сайту (Nielsen, Stanford Web Credibility):
+            опрятный лендинг vs любительский одностраничник. К безопасности выплаты не относится —
+            мошенник тоже может сделать красиво. Полезно как отсев «это не похоже на контору».
+            Появляется только если был скриншот.</p>
+          <p><span class="label">Курс ₽/USDT</span>
+            Курс обменника USDT→RUB на 1000 USDT с BestChange: банковский счёт,
+            расчётный счёт, если нет — наличные. Под цифрой — откуда курс и когда его сняли.
+            Если пусто — нажми «Обновить курсы».</p>
+          <p><span class="label">К курсу ЦБ</span>
+            Разница между курсом обменника и официальным курсом ЦБ РФ.
+            В сегменте выплат по реквизитам нормальный спред — около рубля;
+            подозрительно выгодный курс это красный флаг, а не удача.</p>
+        </div>
+      </details>
+
+      <div id="summary-table-wrap"></div>
+    </section>
+
+    <!-- === История === -->
+    <section id="tab-history" class="tab-content">
+      <h2>История анализов</h2>
+      <button id="history-refresh-btn" class="secondary">Обновить</button>
+      <button id="history-clear-btn" class="danger">Очистить историю</button>
+      <div id="history-list"></div>
+    </section>
+  </main>
+
+  <script src="/static/app.js?v=13"></script>
+</body>
+</html>
