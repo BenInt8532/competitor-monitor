@@ -17,7 +17,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, Response
 
-from backend.config import settings
+from backend.config import BUNDLE_ROOT, settings
 from backend.models.schemas import (
     TextAnalysisRequest, TextAnalysisResponse,
     FileAnalysisResponse,
@@ -64,7 +64,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
+FRONTEND_DIR = BUNDLE_ROOT / "frontend"
 app.mount("/static", StaticFiles(directory=str(FRONTEND_DIR)), name="static")
 
 

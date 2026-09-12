@@ -23,6 +23,7 @@ manual-rates.json
 dist/
 build/
 *.spec
+desktop-error.log
 
 # Selenium / ChromeDriver кэш не нужен в репо
 .wdm/

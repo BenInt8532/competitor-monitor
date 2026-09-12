@@ -1,0 +1,4 @@
+# Desktop-сборка (шаг 5 ДЗ). Ставь в тот же .venv, что и сайт.
+PyQt6>=6.6.0
+requests>=2.31.0
+pyinstaller>=6.0.0

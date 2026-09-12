@@ -10,22 +10,47 @@
 """
 
 import os
+import sys
 from pathlib import Path
 from pydantic_settings import BaseSettings
 
-# backend/config.py → backend → competitor-monitor
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
-LESSON_ROOT = PROJECT_ROOT.parent
+
+def _frozen() -> bool:
+    return bool(getattr(sys, "frozen", False))
+
+
+def _exe_dir() -> Path:
+    return Path(sys.executable).resolve().parent
+
+
+def _source_project_root() -> Path:
+    return Path(__file__).resolve().parent.parent
+
+
+# Распакованные файлы .exe (frontend, код) vs папка, куда можно писать JSON.
+BUNDLE_ROOT = Path(getattr(sys, "_MEIPASS")) if _frozen() else _source_project_root()
+PROJECT_ROOT = _exe_dir() if _frozen() else _source_project_root()
+LESSON_ROOT = PROJECT_ROOT if _frozen() else PROJECT_ROOT.parent
 
 
 def _env_file() -> Path:
-    for path in (PROJECT_ROOT / ".env", LESSON_ROOT / ".env"):
+    # Содержимое .env не читаем в чат — только ищем файл по пути.
+    candidates = [PROJECT_ROOT / ".env"]
+    if not _frozen():
+        candidates.append(LESSON_ROOT / ".env")
+    else:
+        candidates.append(Path.cwd() / ".env")
+    for path in candidates:
         if path.is_file():
             return path
-    return PROJECT_ROOT / ".env"
+    return candidates[0]
 
 
 def _data_root() -> Path:
+    if _frozen():
+        if (Path.cwd() / "data").is_dir():
+            return Path.cwd()
+        return PROJECT_ROOT
     if (LESSON_ROOT / "data").is_dir():
         return LESSON_ROOT
     return PROJECT_ROOT

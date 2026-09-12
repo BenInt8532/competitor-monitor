@@ -104,6 +104,27 @@ OPENAI_VISION_MODEL=gpt-4o-mini
 
 ---
 
+## Окно Windows (PyQt6)
+
+Те же пять вкладок, что в браузере. Окно само поднимает API на порту 8000 — или цепляется к уже запущенному сайту. Если 8000 занят чужим процессом, берёт ближайший свободный (8001, 8002…), свой порт задаётся через `CM_PORT`.
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r desktop\requirements.txt
+.\.venv\Scripts\python.exe desktop\main.py
+```
+
+Сборка `competitionmonitor.exe`:
+
+```powershell
+.\.venv\Scripts\python.exe desktop\build.py
+```
+
+Запуск: `desktop\dist\competitionmonitor\competitionmonitor.exe`. Рядом с exe нужен `.env` (ключ не коммитим) и установленный Chrome. **Пересборка очищает `dist/` — `.env` после неё нужно положить заново.** Подробности — `desktop/README.md`.
+
+Проверено сравнением с сайтом на 5 файлах (картинка, PDF, CSV, TXT, JSON): совпали тип файла, имя, оценка доверия, способы выплаты, курс и флаги. Расходится только `design_score` на 1–2 балла — это суждение модели по картинке, оно плавает и между двумя прогонами одной версии.
+
+---
+
 ## Интерфейс
 
 ### Анализ
@@ -221,6 +242,7 @@ competitor-monitor/
       rates_service.py       курс ЦБ
       summary_service.py     сводная таблица и CSV
   frontend/                  index.html, app.js, styles.css
+  desktop/                   окно PyQt6, те же вкладки, сборка .exe
   env.example
   requirements.txt
   run.py
@@ -262,4 +284,4 @@ competitor-monitor/
 
 ## Стек
 
-FastAPI · uvicorn · Pydantic · GPT-4o через [ProxyAPI](https://proxyapi.ru/) · Selenium + Chrome · pypdf · python-docx · openpyxl · Pillow · HTML/CSS/JS.
+FastAPI · uvicorn · Pydantic · GPT-4o через [ProxyAPI](https://proxyapi.ru/) · Selenium + Chrome · pypdf · python-docx · openpyxl · Pillow · HTML/CSS/JS · PyQt6 (окно Windows) · PyInstaller (.exe).
